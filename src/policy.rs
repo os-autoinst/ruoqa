@@ -203,8 +203,9 @@ impl RetryPolicy {
     /// unconditionally), and a `Retry-After` header honored and capped by
     /// `max_retry_after` (it ignores the header). Canonical `openqa-cli`
     /// (`OpenQA::Command::retry_tx`) is a different profile — 0 retries by
-    /// default, a flat 3 s delay, only 502/503 or connection errors — so
-    /// this is not that.
+    /// default, a flat 3 s delay (the fallback when `Retry-After` is absent),
+    /// retries on 408/429/500/502/503/504 or connection errors, and honors
+    /// `Retry-After` — so this is not that.
     #[must_use]
     pub fn upstream_compat() -> Self {
         Self {
