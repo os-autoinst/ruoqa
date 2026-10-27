@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 //! Job state/result constants mirroring openQA's [`OpenQA::Jobs::Constants`],
-//! pinned to revision `5c04ab047ac9cd2552a5d8cb5d92dc57e9c02bd9`. Kept in one
+//! pinned to revision `caa99968f22c7b8a20285ecb359774de320b6b33`. Kept in one
 //! place so consumers don't each hardcode "these are the running states" on
 //! their own.
 //!
@@ -22,7 +22,7 @@
 //! `OpenQA::Jobs::Constants` counterpart — they come from openQA's Python
 //! client and are kept as-is.
 //!
-//! [`OpenQA::Jobs::Constants`]: https://github.com/os-autoinst/openQA/blob/5c04ab047ac9cd2552a5d8cb5d92dc57e9c02bd9/lib/OpenQA/Jobs/Constants.pm
+//! [`OpenQA::Jobs::Constants`]: https://github.com/os-autoinst/openQA/blob/caa99968f22c7b8a20285ecb359774de320b6b33/lib/OpenQA/Jobs/Constants.pm
 
 use serde::{Deserialize, Serialize};
 
@@ -124,7 +124,8 @@ pub enum JobResult {
     UserCancelled,
     /// A user restarted the job.
     UserRestarted,
-    /// The job exceeded its configured timeout.
+    /// The job exceeded its configured timeout, or stayed scheduled longer
+    /// than the server's `max_job_scheduled_time`.
     TimeoutExceeded,
     /// A result this crate doesn't recognize yet.
     #[serde(other)]
