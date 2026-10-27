@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.4](https://github.com/os-autoinst/ruoqa/compare/v0.3.3...v0.3.4) - 2026-10-27
+
+### Other
+
+- *(consts)* re-pin to openQA caa99968f2 and document timeout_exceeded
+- *(policy)* refresh openqa-cli retry_tx description
+- *(deps)* bump release-plz/action
+
 ## [0.3.3](https://github.com/os-autoinst/ruoqa/compare/v0.3.2...v0.3.3) - 2026-10-20
 
 ### Other
