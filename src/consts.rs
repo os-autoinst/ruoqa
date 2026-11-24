@@ -376,6 +376,30 @@ pub fn is_ok_result(result: &str) -> bool {
     OK_RESULTS.contains(&result)
 }
 
+/// Collapses per-status job counts into the single most prominent status.
+///
+/// `count` returns the number of jobs in a given status (`0` when absent).
+/// `unknown` jobs count as `failed` when there are no `failed` ones. Returns
+/// the first entry of [`STATUS_PRIORITY`] with a non-zero count, or `"none"`.
+#[must_use]
+pub fn calculate_aggregate_status(count: impl Fn(&str) -> u64) -> &'static str {
+    let failed = match count("failed") {
+        0 => count("unknown"),
+        n => n,
+    };
+    STATUS_PRIORITY
+        .iter()
+        .copied()
+        .find(|&status| {
+            if status == "failed" {
+                failed > 0
+            } else {
+                count(status) > 0
+            }
+        })
+        .unwrap_or("none")
+}
+
 /// Job settings keys that together identify a test scenario.
 pub const SCENARIO_KEYS: &[&str] = &["DISTRI", "VERSION", "FLAVOR", "ARCH", "TEST"];
 /// `SCENARIO_KEYS` plus `MACHINE`.
@@ -674,6 +698,83 @@ mod tests {
             assert!(!is_ok_result(result));
         }
         assert!(!is_ok_result("none"));
+    }
+
+    fn aggregate(counts: &[(&str, u64)]) -> &'static str {
+        calculate_aggregate_status(|status| {
+            counts
+                .iter()
+                .find_map(|(name, count)| (*name == status).then_some(*count))
+                .unwrap_or(0)
+        })
+    }
+
+    #[test]
+    fn calculate_aggregate_status_follows_status_priority() {
+        assert_eq!(aggregate(&[]), "none", "empty counts");
+        assert_eq!(aggregate(&[("passed", 5)]), "passed");
+        assert_eq!(
+            aggregate(&[("passed", 3), ("softfailed", 1)]),
+            "softfailed",
+            "softfailed beats passed"
+        );
+        assert_eq!(
+            aggregate(&[("passed", 3), ("softfailed", 1), ("failed", 1)]),
+            "failed",
+            "failed beats softfailed and passed"
+        );
+        assert_eq!(
+            aggregate(&[("passed", 3), ("unknown", 1)]),
+            "failed",
+            "unknown counts as failed"
+        );
+        assert_eq!(
+            aggregate(&[("passed", 3), ("failed", 1), ("not_complete", 1)]),
+            "failed",
+            "failed beats not_complete"
+        );
+        assert_eq!(
+            aggregate(&[("passed", 3), ("not_complete", 1)]),
+            "not_complete",
+            "not_complete beats passed"
+        );
+        assert_eq!(
+            aggregate(&[("passed", 3), ("aborted", 1)]),
+            "aborted",
+            "aborted beats passed"
+        );
+        assert_eq!(
+            aggregate(&[("passed", 3), ("cancelled", 1)]),
+            "cancelled",
+            "cancelled beats passed"
+        );
+        assert_eq!(
+            aggregate(&[
+                ("passed", 3),
+                ("softfailed", 1),
+                ("failed", 1),
+                ("scheduled", 1)
+            ]),
+            "scheduled",
+            "scheduled beats failed, softfailed and passed"
+        );
+        assert_eq!(
+            aggregate(&[
+                ("passed", 3),
+                ("softfailed", 1),
+                ("failed", 1),
+                ("scheduled", 1),
+                ("running", 1)
+            ]),
+            "running",
+            "running beats scheduled, failed, softfailed and passed"
+        );
+    }
+
+    #[test]
+    fn calculate_aggregate_status_ignores_zero_counts() {
+        assert_eq!(aggregate(&[("failed", 0), ("unknown", 0)]), "none");
+        assert_eq!(aggregate(&[("running", 0), ("passed", 2)]), "passed");
     }
 
     roundtrip!(
