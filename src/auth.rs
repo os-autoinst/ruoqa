@@ -20,6 +20,10 @@ type HmacSha1 = Hmac<Sha1>;
 /// empty. The path is passed through unchanged: the server's `REST` plugin
 /// re-parses and re-serializes the query before `_valid_hmac` hashes it
 /// (`Mojo::Parameters::to_string`), but never touches the path.
+///
+/// openQA servers since `0c72ddd9f9` move a `format` query key to a trailing
+/// `_format` before they verify the HMAC, so a signed request carrying
+/// `format` fails; use `_format` instead.
 #[must_use]
 pub fn signing_string(url: &Url) -> String {
     let mut out = url.path().to_owned();
