@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 //! Job state/result constants mirroring openQA's [`OpenQA::Jobs::Constants`],
-//! pinned to revision `caa99968f22c7b8a20285ecb359774de320b6b33`. Kept in one
+//! pinned to revision `36fda30d5d65bbc159ca0ca6c361ce7a15333e26`. Kept in one
 //! place so consumers don't each hardcode "these are the running states" on
 //! their own.
 //!
@@ -22,7 +22,7 @@
 //! `OpenQA::Jobs::Constants` counterpart — they come from openQA's Python
 //! client and are kept as-is.
 //!
-//! [`OpenQA::Jobs::Constants`]: https://github.com/os-autoinst/openQA/blob/caa99968f22c7b8a20285ecb359774de320b6b33/lib/OpenQA/Jobs/Constants.pm
+//! [`OpenQA::Jobs::Constants`]: https://github.com/os-autoinst/openQA/blob/36fda30d5d65bbc159ca0ca6c361ce7a15333e26/lib/OpenQA/Jobs/Constants.pm
 
 use serde::{Deserialize, Serialize};
 
@@ -234,24 +234,17 @@ pub const META_MAPPING_RESULT: &[(&str, &[&str])] = &[
     (NOT_OK, NOT_OK_RESULTS),
 ];
 
-/// Result priority order for the overview page (worst first).
-pub const OVERVIEW_STATUS_PRIORITY: &[&str] = &[
-    "failed",
-    "not_complete",
-    "softfailed",
-    "running",
-    "scheduled",
-    "passed",
-    "aborted",
-];
-/// Result priority order for status aggregation (worst first).
+/// Result priority order for status aggregation: pending states first
+/// (`running`, `scheduled`), then the worst finished result.
 pub const STATUS_PRIORITY: &[&str] = &[
+    "running",
+    "scheduled",
     "failed",
     "not_complete",
     "softfailed",
     "aborted",
-    "running",
-    "scheduled",
+    "cancelled",
+    "passed",
     "none",
 ];
 /// Default priority assigned to new jobs.
@@ -579,26 +572,16 @@ mod tests {
     #[test]
     fn priority_and_result_files_match_openqa() {
         assert_eq!(
-            OVERVIEW_STATUS_PRIORITY,
-            [
-                "failed",
-                "not_complete",
-                "softfailed",
-                "running",
-                "scheduled",
-                "passed",
-                "aborted",
-            ]
-        );
-        assert_eq!(
             STATUS_PRIORITY,
             [
+                "running",
+                "scheduled",
                 "failed",
                 "not_complete",
                 "softfailed",
                 "aborted",
-                "running",
-                "scheduled",
+                "cancelled",
+                "passed",
                 "none",
             ]
         );
