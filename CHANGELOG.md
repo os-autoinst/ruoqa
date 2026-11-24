@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0](https://github.com/os-autoinst/ruoqa/compare/v0.3.4...v0.4.0) - 2026-11-24
+
+### Added
+
+- *(consts)* add calculate_aggregate_status
+
+### Fixed
+
+- *(consts)* [**breaking**] re-sync status priorities with openQA 36fda30d5d
+- *(deps)* bump url to 2.5.9 for RUSTSEC-2026-0592
+
+### Other
+
+- *(auth)* note openQA's server-side format rewrite
+- *(deps)* bump the cargo-minor-patch group with 3 updates
+- *(deps)* bump release-plz/action
+- *(deps)* bump serde-saphyr
+- *(deps)* bump release-plz/action
+
 ## [0.3.4](https://github.com/os-autoinst/ruoqa/compare/v0.3.3...v0.3.4) - 2026-10-27
 
 ### Other
